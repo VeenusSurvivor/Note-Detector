@@ -3,305 +3,576 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Note Detector</title>
+<title>Sing to the Staff</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #1a1a2e; color: #e8e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.app { width: 100%; max-width: 680px; padding: 1.5rem 1rem 2rem; }
-.topbar { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 1rem; }
-.dot { width: 9px; height: 9px; border-radius: 50%; background: #444; flex-shrink: 0; }
-.dot.on { background: #1D9E75; animation: pulse 1.1s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-.status { font-size: 13px; color: #888; }
-.noterow { display: flex; align-items: baseline; justify-content: center; gap: 12px; min-height: 72px; margin-bottom: 0.25rem; }
-.solname { font-size: 58px; font-weight: 500; line-height: 1; color: #555; transition: color .15s; }
-.solname.lit { color: #5B8BF7; }
-.sciname { font-size: 22px; color: #666; margin-bottom: 7px; }
-svg.sv { display: block; width: 100%; overflow: visible; }
-.centsbox { max-width: 360px; margin: 0.5rem auto; }
-.centslbl { text-align: center; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 5px; }
-.centstrack { position: relative; height: 6px; background: #2a2a3e; border-radius: 3px; }
-.centsctr { position: absolute; left: 50%; top: -4px; height: 14px; width: 1px; background: #444; transform: translateX(-50%); }
-.centsndl { position: absolute; top: 50%; width: 10px; height: 10px; border-radius: 50%; background: #555; left: 50%; transform: translate(-50%,-50%); transition: left .11s cubic-bezier(.2,0,.4,1), background .2s; }
-.centsndl.green { background: #1D9E75; }
-.centsticks { display: flex; justify-content: space-between; margin-top: 4px; }
-.centick { font-size: 10px; color: #555; }
-.volrow { max-width: 360px; margin: 0.6rem auto; display: flex; align-items: center; gap: 9px; }
-.vollbl { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: .07em; white-space: nowrap; }
-.voltrack { flex: 1; height: 3px; background: #2a2a3e; border-radius: 2px; overflow: hidden; }
-.volfill { height: 100%; width: 0%; background: #444; border-radius: 2px; transition: width .05s; }
-.btnrow { display: flex; justify-content: center; margin-top: 1.1rem; }
-.mbtn { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 8px 22px; border-radius: 22px; border: 1px solid #444; background: transparent; cursor: pointer; color: #ccc; transition: background .15s, border-color .15s; }
-.mbtn:hover { background: #2a2a3e; }
-.mbtn.on { background: #3a1a1a; color: #f07070; border-color: #553333; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#0f0f1c;color:#dde;
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:1rem;
+}
+.app{width:100%;max-width:860px}
+
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
+h1{font-size:14px;font-weight:500;color:#555;letter-spacing:.1em;text-transform:uppercase}
+.live-badge{display:flex;align-items:center;gap:7px;font-size:12px;color:#555}
+.dot{width:8px;height:8px;border-radius:50%;background:#252535;flex-shrink:0}
+.dot.on{background:#1D9E75;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.15}}
+
+.target-bar{
+  display:flex;align-items:center;justify-content:center;
+  gap:14px;padding:.6rem 1rem;
+  background:#0a0a18;border:1px solid #1b1b2c;border-radius:10px;
+  margin-bottom:.9rem;
+}
+.t-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.08em}
+.t-name{display:flex;flex-direction:column;align-items:center;min-width:80px}
+#tSol{font-size:30px;font-weight:500;color:#F5A623;line-height:1.05}
+#tSci{font-size:12px;color:#666;margin-top:1px}
+.arr{
+  width:30px;height:30px;border-radius:7px;
+  background:none;border:1px solid #222235;
+  color:#777;font-size:13px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.arr:hover{background:#181828;color:#ccc}
+
+.staff-wrap{
+  background:#080816;border-radius:12px;
+  border:1px solid #161628;overflow:hidden;
+  margin-bottom:.9rem;position:relative;
+}
+#staffSvg{display:block;width:100%}
+.match-flash{
+  position:absolute;top:10px;right:14px;
+  font-size:13px;font-weight:500;color:#1D9E75;
+  letter-spacing:.04em;opacity:0;
+  transition:opacity .25s;pointer-events:none;
+}
+.match-flash.show{opacity:1}
+
+.readout{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:.8rem}
+#liveSol{
+  font-size:34px;font-weight:400;color:#4a7af0;
+  min-width:110px;text-align:center;transition:color .2s;line-height:1;
+}
+#liveSol.match{color:#1D9E75}
+.meters{display:flex;flex-direction:column;gap:7px;min-width:200px}
+.m-row{display:flex;align-items:center;gap:8px}
+.m-lbl{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.07em;min-width:32px}
+.m-track{flex:1;height:6px;background:#141424;border-radius:3px;overflow:hidden}
+.m-fill{height:100%;border-radius:3px;background:#2a3a7a;transition:width .07s}
+.t-wrap{flex:1;height:6px;background:#141424;border-radius:3px;position:relative;overflow:visible}
+.t-ctr{position:absolute;left:50%;top:-3px;width:1px;height:12px;background:#222235}
+.t-ndl{
+  position:absolute;top:50%;width:11px;height:11px;
+  border-radius:50%;background:#222235;left:50%;
+  transform:translate(-50%,-50%);
+  transition:left .1s cubic-bezier(.2,0,.4,1),background .2s;
+}
+.t-ndl.green{background:#1D9E75}
+
+.ctrls{display:flex;gap:8px;justify-content:center;margin-bottom:.8rem}
+.btn{
+  padding:7px 22px;border-radius:18px;border:1px solid #222235;
+  background:transparent;color:#aaa;cursor:pointer;font-size:13px;
+  transition:background .15s;
+}
+.btn:hover{background:#141424}
+.btn.stop{background:#3a1212;color:#f08080;border-color:#5a2020}
+
+.legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:#444}
+.qt-pill{
+  display:inline-block;width:12px;height:12px;border-radius:2px;
+  background:#4a7af0;opacity:.7;transform:rotate(45deg);margin-right:2px;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="topbar">
-    <div class="dot" id="dot"></div>
-    <span class="status" id="status">Press start, then sing a note</span>
-  </div>
-
-  <div class="noterow">
-    <span class="solname" id="sn">—</span>
-    <span class="sciname" id="sc"></span>
-  </div>
-
-  <svg class="sv" viewBox="0 0 680 270" role="img">
-    <title>Music staff showing detected pitch</title>
-    <desc>A treble clef staff. The blue notehead moves to show which note is being sung.</desc>
-
-    <!-- 5 staff lines: bottom=E4(169) G4(153) B4(137) D5(121) top=F5(105) -->
-    <line x1="128" x2="600" y1="105" y2="105" stroke="#ccc" stroke-width="1.3" opacity=".5"/>
-    <line x1="128" x2="600" y1="121" y2="121" stroke="#ccc" stroke-width="1.3" opacity=".5"/>
-    <line x1="128" x2="600" y1="137" y2="137" stroke="#ccc" stroke-width="1.3" opacity=".5"/>
-    <line x1="128" x2="600" y1="153" y2="153" stroke="#ccc" stroke-width="1.3" opacity=".5"/>
-    <line x1="128" x2="600" y1="169" y2="169" stroke="#ccc" stroke-width="1.3" opacity=".5"/>
-
-    <!-- Subtle note name labels on right margin -->
-    <text x="610" y="109"  font-size="11" fill="#444" dominant-baseline="central">Fa₅</text>
-    <text x="610" y="125"  font-size="11" fill="#444" dominant-baseline="central">Re₅</text>
-    <text x="610" y="141"  font-size="11" fill="#444" dominant-baseline="central">Si₄</text>
-    <text x="610" y="157"  font-size="11" fill="#444" dominant-baseline="central">Sol₄</text>
-    <text x="610" y="173"  font-size="11" fill="#444" dominant-baseline="central">Mi₄</text>
-
-    <!-- Treble clef -->
-    <text x="70" y="198"
-          font-family="'Times New Roman','Georgia',serif"
-          font-size="158" fill="#ccc" opacity=".7">&#x1D11E;</text>
-
-    <!-- Dynamic note group -->
-    <g id="ng" style="opacity:0;transition:opacity .22s">
-      <g id="ldg"></g>
-      <text id="acc"
-            font-family="'Times New Roman',serif"
-            font-size="26" text-anchor="end"
-            dominant-baseline="central"
-            fill="#5B8BF7" x="345" y="137"></text>
-      <ellipse id="nh"
-               cx="362" cy="137" rx="12.5" ry="8.5"
-               transform="rotate(-15,362,137)"
-               fill="#5B8BF7"/>
-      <line id="stm"
-            x1="374" y1="137" x2="374" y2="97"
-            stroke="#5B8BF7" stroke-width="1.8"
-            stroke-linecap="round"/>
-    </g>
-  </svg>
-
-  <div class="centsbox">
-    <div class="centslbl">Tuning</div>
-    <div class="centstrack">
-      <div class="centsctr"></div>
-      <div class="centsndl" id="cndl"></div>
+  <header>
+    <h1>Sing to the Staff</h1>
+    <div class="live-badge">
+      <div class="dot" id="dot"></div>
+      <span id="statusTxt">Press Start to listen</span>
     </div>
-    <div class="centsticks">
-      <span class="centick">−50¢</span>
-      <span class="centick">in tune</span>
-      <span class="centick">+50¢</span>
+  </header>
+
+  <div class="target-bar">
+    <span class="t-label">Target note</span>
+    <button class="arr" onclick="stepTarget(-2)">◀◀</button>
+    <button class="arr" onclick="stepTarget(-1)">◀</button>
+    <div class="t-name">
+      <span id="tSol">Si</span>
+      <span id="tSci">B4</span>
+    </div>
+    <button class="arr" onclick="stepTarget(1)">▶</button>
+    <button class="arr" onclick="stepTarget(2)">▶▶</button>
+    <span class="t-label" style="font-size:10px;margin-left:4px">◀▶ = semitone&nbsp;&nbsp;◀◀▶▶ = quarter tone</span>
+  </div>
+
+  <div class="staff-wrap">
+    <svg id="staffSvg" viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg">
+      <g id="gStaff"></g>
+      <!-- Quarter-tone guide lines (very faint, between staff lines) -->
+      <g id="gQtGuide" opacity="0.06"></g>
+      <text x="30" y="208"
+        font-family="'Times New Roman','Georgia',serif"
+        font-size="155" fill="#bbb" opacity="0.18">&#x1D11E;</text>
+      <line id="sepLine" x1="720" y1="60" x2="720" y2="168"
+        stroke="#333" stroke-width="1" stroke-dasharray="4,3" opacity="0.5"/>
+      <text x="757" y="52" text-anchor="middle"
+        font-size="9" font-family="-apple-system,sans-serif"
+        fill="#F5A623" opacity="0.7" letter-spacing="0.05em">TARGET</text>
+      <g id="gNotes"></g>
+      <g id="gGhost" opacity="0.45"></g>
+      <g id="gTarget"></g>
+    </svg>
+    <div class="match-flash" id="matchFlash">✓ On pitch!</div>
+  </div>
+
+  <div class="readout">
+    <span id="liveSol">—</span>
+    <div class="meters">
+      <div class="m-row">
+        <span class="m-lbl">Vol</span>
+        <div class="m-track"><div class="m-fill" id="volFill" style="width:0%"></div></div>
+      </div>
+      <div class="m-row">
+        <span class="m-lbl">Tune</span>
+        <div class="t-wrap">
+          <div class="t-ctr"></div>
+          <div class="t-ndl" id="tuneNdl"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="volrow">
-    <span class="vollbl">Vol</span>
-    <div class="voltrack"><div class="volfill" id="vf"></div></div>
+  <div class="ctrls">
+    <button class="btn" id="startBtn" onclick="toggle()">🎤 Start</button>
+    <button class="btn" onclick="clearNotes()">🗑 Clear</button>
   </div>
 
-  <div class="btnrow">
-    <button class="mbtn" id="mbtn" onclick="toggle()">
-      🎤 Start listening
-    </button>
+  <div class="legend">
+    <div class="li">● <span>Semitone (Do, Do♯, Re…)</span></div>
+    <div class="li"><span class="qt-pill"></span><span>Quarter-tone (between semitones)</span></div>
+    <div class="li">↑<span style="font-size:9px;margin-left:2px">half-sharp</span> &nbsp; ↓<span style="font-size:9px;margin-left:2px">half-flat</span></div>
+    <div class="li"><span style="color:#F5A623">♦</span><span>Target</span></div>
+    <div class="li"><span style="color:#1D9E75">●</span><span>Match!</span></div>
   </div>
 </div>
 
 <script>
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const NX   = 362;   // notehead x
-const L5Y  = 105;   // top staff line y = F5 = step 8
-const SZ   = 8;     // px per diatonic step
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const BG = '#080816';
 
-function sy(step) { return L5Y + (8 - step) * SZ; }
-// sy(8)=105(F5) sy(6)=121(D5) sy(4)=137(B4) sy(2)=153(G4) sy(0)=169(E4)
+// ── Quarter-tone pitch system ────────────────────────────────────────────────
+// We quantise pitch to 24 equal steps per octave (50 cents each).
+// A "qtMidi" is a multiple of 0.5 — whole numbers = semitones,
+// half-integers (x.5) = quarter tones (half a semitone above the lower note).
 
-// Italian fixed-Do solfège
-const SOL  = ['Do','Do\u266F','Re','Re\u266F','Mi','Fa','Fa\u266F','Sol','Sol\u266F','La','La\u266F','Si'];
-const LET  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const DIAS = [0,0,1,1,2,3,3,4,4,5,5,6];
-const SHRP = [0,1,0,1,0,0,1,0,1,0,1,0];
+const SOL_BASE = ['Do','Do♯','Re','Re♯','Mi','Fa','Fa♯','Sol','Sol♯','La','La♯','Si'];
+const SCI_BASE = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+// Diatonic step within octave for each chromatic pitch (0=C … 11=B)
+const DIA  = [0,0,1,1,2,3,3,4,4,5,5,6];
+const SUBS = ['₀','₁','₂','₃','₄','₅','₆','₇','₈','₉'];
 
-function noteInfo(freq) {
-  const midi = 69 + 12 * Math.log2(freq / 440);
-  const rnd  = Math.round(midi);
-  const cts  = Math.round((midi - rnd) * 100);
-  const idx  = ((rnd % 12) + 12) % 12;
-  const oct  = Math.floor(rnd / 12) - 1;
-  const step = (oct - 4) * 7 + DIAS[idx] - 2;
-  return { sol: SOL[idx], letter: LET[idx].replace('#',''), oct, cts, step, sharp: !!SHRP[idx] };
-}
+// Given a qtMidi (multiple of 0.5), return display info
+function qtInfo(qtm) {
+  const isQt   = (qtm % 1 !== 0);            // quarter tone between semitones
+  const lower  = Math.floor(qtm);            // lower semitone
+  const ch     = ((lower % 12) + 12) % 12;
+  const oct    = Math.floor(lower / 12) - 1;
+  const diaStep = (oct - 4) * 7 + DIA[ch];  // diatonic position in C4 grid
 
-function ledgerSteps(step) {
-  const res = [];
-  if (step <= -2) {
-    const lo = step % 2 === 0 ? step : step + 1;
-    for (let s = -2; s >= lo; s -= 2) res.push(s);
-  } else if (step >= 10) {
-    const hi = step % 2 === 0 ? step : step - 1;
-    for (let s = 10; s <= hi; s += 2) res.push(s);
+  let solName, sciName;
+  if (!isQt) {
+    solName = SOL_BASE[ch];
+    sciName = SCI_BASE[ch].replace('#','♯') + oct;
+  } else {
+    // Quarter tone sits between `lower` and `lower+1`
+    // Name: lower note + ↑  (half-sharp)
+    solName = SOL_BASE[ch] + '↑';
+    sciName = SCI_BASE[ch].replace('#','♯') + oct + '↑';
   }
-  return res;
+
+  // Y position on staff: each diatonic step = 8px. Quarter tones: extra −4px
+  const staffY = 168 - diaStep * 8 - (isQt ? 4 : 0);
+
+  return { qtm, lower, isQt, ch, oct, diaStep, solName, sciName, staffY };
 }
 
-const ng   = document.getElementById('ng');
-const nh   = document.getElementById('nh');
-const stm  = document.getElementById('stm');
-const acc  = document.getElementById('acc');
-const ldg  = document.getElementById('ldg');
-const sn   = document.getElementById('sn');
-const sc   = document.getElementById('sc');
-const cndl = document.getElementById('cndl');
-const vf   = document.getElementById('vf');
-const dot  = document.getElementById('dot');
-const stat = document.getElementById('status');
-const mbtn = document.getElementById('mbtn');
+function durType(ms) {
+  if (ms < 400)  return 'eighth';
+  if (ms < 900)  return 'quarter';
+  if (ms < 2000) return 'half';
+  return 'whole';
+}
 
-let audioCtx, analyser, micSrc, rafId;
-let running = false;
-let curY   = sy(4);
-let smFreq = 0;
-let noSig  = 0;
+function ledgersFor(diaStep, isQt) {
+  // Ledger lines drawn at diatonic integer positions outside staff
+  const L = [];
+  if (diaStep < 2)  { for (let s = 0;  s >= diaStep; s -= 2) L.push(s); }
+  if (diaStep > 11) { for (let s = 12; s <= diaStep; s += 2) L.push(s); }
+  return L;
+}
 
+// ── SVG helpers ───────────────────────────────────────────────────────────────
+function el(tag, a={}) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(a)) e.setAttribute(k,v);
+  return e;
+}
+
+function addText(parent, x, y, str, attrs={}) {
+  const t = el('text', {x, y, ...attrs});
+  t.textContent = str;
+  parent.appendChild(t);
+}
+
+// ── Build a notehead group ────────────────────────────────────────────────────
+function buildNote(x, info, type, color, label=false) {
+  const { staffY, diaStep, isQt, solName, sciName } = info;
+  const y   = Math.round(staffY);
+  const up  = diaStep < 6;  // stem up below middle line (B4 = diastep 6)
+  const isWhole = type === 'whole';
+  const isOpen  = type === 'half' || isWhole;
+  const g = el('g');
+
+  // Ledger lines (only for integer diaSteps, quarter tones borrow nearest ledger)
+  const lSteps = ledgersFor(Math.round(diaStep + (isQt?0.5:0)));
+  for (const ls of lSteps) {
+    g.appendChild(el('line',{
+      x1: x-18, y1: 168-ls*8, x2: x+18, y2: 168-ls*8,
+      stroke:'#777','stroke-width':'1.1'
+    }));
+  }
+
+  // For quarter tones we draw a diamond notehead instead of ellipse
+  if (isQt) {
+    // Diamond shape: rotated square
+    const s = isWhole ? 11 : 9;
+    const pts = `${x},${y-s} ${x+s},${y} ${x},${y+s} ${x-s},${y}`;
+    const diam = el('polygon',{points:pts});
+    if (isOpen) {
+      diam.setAttribute('fill', BG);
+      diam.setAttribute('stroke', color);
+      diam.setAttribute('stroke-width','1.9');
+    } else {
+      diam.setAttribute('fill', color);
+    }
+    g.appendChild(diam);
+
+    // Stem for non-whole diamond notes
+    if (!isWhole) {
+      const sx = up ? x+s-1 : x-s+1;
+      const sy2 = up ? y-36 : y+36;
+      g.appendChild(el('line',{x1:sx,y1:y,x2:sx,y2:sy2,stroke:color,'stroke-width':'1.7','stroke-linecap':'round'}));
+      if (type==='eighth') {
+        const fp = el('path');
+        fp.setAttribute('d', up
+          ? `M${sx},${sy2} C${sx+18},${sy2+8} ${sx+14},${sy2+22} ${sx},${sy2+28}`
+          : `M${sx},${sy2} C${sx+18},${sy2-8} ${sx+14},${sy2-22} ${sx},${sy2-28}`);
+        fp.setAttribute('fill','none');
+        fp.setAttribute('stroke',color);
+        fp.setAttribute('stroke-width','1.7');
+        g.appendChild(fp);
+      }
+    }
+
+    // ↑ symbol above/below
+    addText(g, x, up ? y+26 : y-18,
+      '↑',{
+        'text-anchor':'middle','font-size':'11',
+        'font-family':'-apple-system,sans-serif',
+        fill: color, opacity:'0.95'
+      });
+
+  } else {
+    // Standard ellipse notehead
+    const rx = isWhole ? 11.5 : 9.5;
+    const ry = isWhole ? 7.5  : 6.3;
+
+    // Sharp accidental
+    if (SOL_BASE[info.ch].includes('♯')) {
+      addText(g, x-17, y, '♯', {
+        fill:color,'font-family':"'Times New Roman',serif",'font-size':'16',
+        'dominant-baseline':'central','text-anchor':'middle'
+      });
+    }
+
+    const nh = el('ellipse',{cx:x,cy:y,rx,ry,transform:`rotate(-15,${x},${y})`});
+    if (isOpen) {
+      nh.setAttribute('fill',BG);
+      nh.setAttribute('stroke',color);
+      nh.setAttribute('stroke-width','1.9');
+    } else {
+      nh.setAttribute('fill',color);
+    }
+    g.appendChild(nh);
+
+    // Stem
+    if (!isWhole) {
+      const sx  = up ? x+rx-0.5 : x-rx+0.5;
+      const sy2 = up ? y-38 : y+38;
+      g.appendChild(el('line',{x1:sx,y1:y,x2:sx,y2:sy2,stroke:color,'stroke-width':'1.7','stroke-linecap':'round'}));
+      if (type==='eighth') {
+        const fp = el('path');
+        fp.setAttribute('d', up
+          ? `M${sx},${sy2} C${sx+20},${sy2+9} ${sx+16},${sy2+24} ${sx},${sy2+30}`
+          : `M${sx},${sy2} C${sx+20},${sy2-9} ${sx+16},${sy2-24} ${sx},${sy2-30}`);
+        fp.setAttribute('fill','none');
+        fp.setAttribute('stroke',color);
+        fp.setAttribute('stroke-width','1.7');
+        g.appendChild(fp);
+      }
+    }
+  }
+
+  // Label
+  if (label) {
+    const ly = up ? y+22 : y-24;
+    addText(g, x, ly, solName, {
+      'text-anchor':'middle','font-size':'9',
+      'font-family':'-apple-system,BlinkMacSystemFont,sans-serif',
+      fill: color, opacity:'0.9'
+    });
+  }
+
+  return g;
+}
+
+// ── Staff & quarter-tone guides ───────────────────────────────────────────────
+function drawStaff() {
+  const g  = document.getElementById('gStaff');
+  const gq = document.getElementById('gQtGuide');
+  g.innerHTML = ''; gq.innerHTML = '';
+
+  // Main 5 staff lines (diatonic steps 2,4,6,8,10 = E4,G4,B4,D5,F5)
+  for (const s of [2,4,6,8,10]) {
+    const y = 168-s*8;
+    g.appendChild(el('line',{x1:95,y1:y,x2:800,y2:y,stroke:'#ccc','stroke-width':'1',opacity:'0.22'}));
+  }
+
+  // Very faint quarter-tone guide lines (one between each pair of staff lines)
+  for (const s of [3,5,7,9]) {
+    // Half-integer between staff lines: y = 168 - s*8
+    // quarter tone sits 4px above lower line
+    const y = 168 - s*8;
+    gq.appendChild(el('line',{x1:95,y1:y,x2:800,y2:y,stroke:'#7af','stroke-width':'0.5',opacity:'1','stroke-dasharray':'2,6'}));
+  }
+}
+
+// ── Target system ─────────────────────────────────────────────────────────────
+// Target can be a semitone (qtm = integer) or quarter tone (qtm = x.5)
+// Stored as multiples of 0.5 (same as qtMidi)
+let targetQtm  = 71;   // B4 by default
+
+function updateTargetUI() {
+  const info = qtInfo(targetQtm);
+  document.getElementById('tSol').textContent = info.solName;
+  document.getElementById('tSci').textContent = info.sciName;
+  drawTarget();
+}
+
+function drawTarget() {
+  const g = document.getElementById('gTarget');
+  g.innerHTML = '';
+  const info = qtInfo(targetQtm);
+  g.appendChild(buildNote(757, info, 'half', '#F5A623', true));
+}
+
+// step: ±1 = quarter tone (±0.5 qtm), ±2 = semitone (±1 qtm)
+function stepTarget(d) {
+  const delta = d === 1 ? 0.5 : d === -1 ? -0.5 : d > 0 ? 1 : -1;
+  targetQtm = Math.max(48, Math.min(84, targetQtm + delta));
+  updateTargetUI();
+  redrawCommitted();
+}
+
+// ── Note grid & display ───────────────────────────────────────────────────────
+const NX_START = 132, N_SP = 52, MAX_VIS = 8;
+let committedNotes = [];  // [{qtm, durMs}]
+
+function redrawCommitted() {
+  const g = document.getElementById('gNotes');
+  g.innerHTML = '';
+  const show = committedNotes.slice(-MAX_VIS);
+  show.forEach((n, i) => {
+    const x     = NX_START + i * N_SP;
+    const info  = qtInfo(n.qtm);
+    const match = n.qtm === targetQtm;
+    g.appendChild(buildNote(x, info, durType(n.durMs), match ? '#1D9E75' : '#4a7af0', true));
+  });
+}
+
+function redrawGhost(info, type) {
+  const g = document.getElementById('gGhost');
+  g.innerHTML = '';
+  if (!info) return;
+  const color = info.qtm === targetQtm ? '#1D9E75' : '#4a7af0';
+  g.appendChild(buildNote(624, info, type || 'quarter', color, true));
+}
+
+// ── Pitch detection (ACF) ─────────────────────────────────────────────────────
 function acf(buf, sr, rms) {
-  if (rms < 0.008) return -1;
+  if (rms < 0.007) return -1;
   const N = buf.length;
-  let r1 = 0, r2 = N - 1;
-  for (let i = 0; i < N >> 1; i++) { if (Math.abs(buf[i]) < 0.2) { r1 = i; break; } }
-  for (let i = 1; i < N >> 1; i++) { if (Math.abs(buf[N-i]) < 0.2) { r2 = N-i; break; } }
-  const s = buf.slice(r1, r2);
-  const M = s.length;
-  if (M < 200) return -1;
-  const minLag = Math.max(2, Math.floor(sr / 1300));
-  const maxLag = Math.min(M - 2, Math.ceil(sr / 70));
-  const c = new Float32Array(maxLag + 1);
-  for (let lag = minLag; lag <= maxLag; lag++) {
-    let sum = 0, lim = M - lag;
-    for (let j = 0; j < lim; j++) sum += s[j] * s[j + lag];
-    c[lag] = sum;
+  const minL = Math.ceil(sr / 1300);
+  const maxL = Math.min(N-2, Math.floor(sr/65));
+  if (maxL < minL) return -1;
+  const c = new Float32Array(maxL+1);
+  for (let lag=minL; lag<=maxL; lag++) {
+    let s=0; for (let j=0;j<N-lag;j++) s+=buf[j]*buf[j+lag]; c[lag]=s;
   }
-  let d = minLag;
-  while (d < maxLag - 1 && c[d] > c[d+1]) d++;
-  let best = -Infinity, pos = -1;
-  for (let i = d; i <= maxLag; i++) { if (c[i] > best) { best = c[i]; pos = i; } }
-  if (pos < 1 || pos >= maxLag || best <= 0) return -1;
-  const a1 = c[pos-1], a2 = c[pos], a3 = c[pos+1];
-  const a = (a1 + a3 - 2*a2) / 2, b = (a3 - a1) / 2;
-  const T = a !== 0 ? pos - b/(2*a) : pos;
-  return sr / T;
+  let d=minL; while(d<maxL-1&&c[d]>c[d+1])d++;
+  let best=-Infinity, pos=-1;
+  for (let i=d;i<=maxL;i++) if(c[i]>best){best=c[i];pos=i;}
+  if (pos<1||pos>=maxL||best<=0) return -1;
+  const a1=c[pos-1],a2=c[pos],a3=c[pos+1];
+  const a=(a1+a3-2*a2)/2;
+  const T=a!==0?pos-(a3-a1)/(4*a):pos;
+  return sr/T;
 }
 
+// ── App state ─────────────────────────────────────────────────────────────────
+let audioCtx, analyser, rafId, running=false;
+let smFreq=0, silF=0;
+const SIL_THRESH=18, MIN_MS=60;
+let currentNote=null;           // {qtm, startTime}
+let wasMatch=false;
+let prevGhostQtm=-1, prevGhostType='';
+
+// ── Frame loop ────────────────────────────────────────────────────────────────
 function frame() {
   if (!running) return;
   rafId = requestAnimationFrame(frame);
+
   const buf = new Float32Array(analyser.fftSize);
   analyser.getFloatTimeDomainData(buf);
-  let rms = 0;
-  for (let i = 0; i < buf.length; i++) rms += buf[i] * buf[i];
-  rms = Math.sqrt(rms / buf.length);
-  vf.style.width = Math.min(100, rms * 700) + '%';
+  let rms=0; for (const v of buf) rms+=v*v;
+  rms=Math.sqrt(rms/buf.length);
+  document.getElementById('volFill').style.width=Math.min(100,rms*700)+'%';
 
-  const freq = acf(buf, audioCtx.sampleRate, rms);
+  const freq=acf(buf, audioCtx.sampleRate, rms);
 
-  if (freq > 70 && freq < 1300) {
-    noSig = 0;
-    if (smFreq === 0) smFreq = freq;
-    const jump = Math.abs(freq - smFreq) / smFreq;
-    smFreq = (jump > 0.1 ? 0.5 : 0.18) * freq + (jump > 0.1 ? 0.5 : 0.82) * smFreq;
+  if (freq>65&&freq<1400) {
+    silF=0;
+    smFreq=smFreq===0?freq:(Math.abs(freq-smFreq)/smFreq>0.08?0.5:0.14)*freq
+          +(Math.abs(freq-smFreq)/smFreq>0.08?0.5:0.86)*smFreq;
 
-    const info   = noteInfo(smFreq);
-    const cstep  = Math.max(-8, Math.min(18, info.step));
-    curY += (sy(cstep) - curY) * 0.28;
+    // Raw midi (continuous)
+    const rawMidi = 69 + 12*Math.log2(smFreq/440);
+    // Quantise to nearest quarter tone (0.5 semitone)
+    const qtm     = Math.round(rawMidi*2)/2;
+    // Cents deviation from this quarter-tone grid point
+    const cents   = Math.round((rawMidi - qtm)*100);
+    const info    = qtInfo(qtm);
+    const now     = Date.now();
 
-    // Ledger lines
-    ldg.innerHTML = '';
-    ledgerSteps(cstep).forEach(function(s) {
-      const ly = sy(s);
-      const el = document.createElementNS(SVG_NS, 'line');
-      el.setAttribute('x1', NX - 22); el.setAttribute('x2', NX + 22);
-      el.setAttribute('y1', ly);      el.setAttribute('y2', ly);
-      el.setAttribute('stroke', '#ccc'); el.setAttribute('stroke-width', '1.3');
-      el.setAttribute('opacity', '0.5');
-      ldg.appendChild(el);
-    });
-
-    acc.textContent = info.sharp ? '\u266F' : '';
-    if (info.sharp) { acc.setAttribute('x', NX - 16); }
-
-    sn.textContent = info.sol;
-    sn.classList.add('lit');
-    sc.textContent = info.letter + (info.sharp ? '\u266F' : '') + info.oct;
-    cndl.style.left = (50 + info.cts) + '%';
-    cndl.classList.toggle('green', Math.abs(info.cts) < 12);
-    ng.style.opacity = '1';
-  } else {
-    noSig++;
-    if (noSig > 20) {
-      curY += (sy(4) - curY) * 0.05;
-      ng.style.opacity = '0';
-      sn.textContent = '—'; sn.classList.remove('lit');
-      sc.textContent = ''; smFreq = 0;
+    // Commit on pitch change
+    if (!currentNote || currentNote.qtm !== qtm) {
+      if (currentNote && now-currentNote.startTime>=MIN_MS) {
+        committedNotes.push({qtm:currentNote.qtm, durMs:now-currentNote.startTime});
+        if (committedNotes.length>60) committedNotes.shift();
+        redrawCommitted();
+      }
+      currentNote={qtm,startTime:now};
     }
-  }
 
-  nh.setAttribute('cy', curY);
-  nh.setAttribute('transform', 'rotate(-15,' + NX + ',' + curY + ')');
-  acc.setAttribute('y', curY);
+    // Ghost
+    const ghostTyp = durType(now-currentNote.startTime);
+    if (qtm!==prevGhostQtm || ghostTyp!==prevGhostType) {
+      prevGhostQtm=qtm; prevGhostType=ghostTyp;
+      redrawGhost(info, ghostTyp);
+    }
 
-  const approxStep = Math.round((L5Y - curY) / SZ + 8);
-  if (approxStep < 4) {
-    stm.setAttribute('x1', NX+12); stm.setAttribute('x2', NX+12);
-    stm.setAttribute('y1', curY);  stm.setAttribute('y2', curY-52);
+    // Match: within 25 cents of target quarter-tone
+    const isMatch = qtm===targetQtm && Math.abs(cents)<25;
+    if (isMatch&&!wasMatch) {
+      wasMatch=true;
+      const f=document.getElementById('matchFlash');
+      f.classList.add('show');
+      setTimeout(()=>f.classList.remove('show'),1400);
+    }
+    if (!isMatch) wasMatch=false;
+
+    // UI
+    document.getElementById('liveSol').textContent=info.solName;
+    document.getElementById('liveSol').classList.toggle('match',isMatch);
+    const ndl=document.getElementById('tuneNdl');
+    ndl.style.left=(50+Math.max(-47,Math.min(47,cents)))+'%';
+    ndl.classList.toggle('green',Math.abs(cents)<14);
+
   } else {
-    stm.setAttribute('x1', NX-12); stm.setAttribute('x2', NX-12);
-    stm.setAttribute('y1', curY);  stm.setAttribute('y2', curY+52);
+    silF++;
+    if (silF===SIL_THRESH) {
+      if (currentNote && Date.now()-currentNote.startTime>=MIN_MS) {
+        committedNotes.push({qtm:currentNote.qtm,durMs:Date.now()-currentNote.startTime});
+        if (committedNotes.length>60) committedNotes.shift();
+        redrawCommitted();
+      }
+      currentNote=null; smFreq=0;
+      prevGhostQtm=-1; prevGhostType='';
+      wasMatch=false;
+      redrawGhost(null);
+      document.getElementById('liveSol').textContent='—';
+      document.getElementById('liveSol').classList.remove('match');
+      document.getElementById('tuneNdl').style.left='50%';
+      document.getElementById('tuneNdl').classList.remove('green');
+    }
   }
 }
 
+// ── Controls ──────────────────────────────────────────────────────────────────
 async function toggle() {
   if (running) {
-    running = false;
-    cancelAnimationFrame(rafId);
-    if (micSrc) micSrc.disconnect();
-    if (audioCtx) audioCtx.close();
-    audioCtx = analyser = micSrc = null;
-    mbtn.textContent = '🎤 Start listening';
-    mbtn.classList.remove('on');
-    dot.classList.remove('on');
-    stat.textContent = 'Press start, then sing a note';
-    ng.style.opacity = '0'; sn.textContent = '—';
-    sn.classList.remove('lit'); sc.textContent = '';
-    smFreq = 0; curY = sy(4);
+    running=false; cancelAnimationFrame(rafId);
+    try{analyser.disconnect();}catch(_){}
+    if(audioCtx)audioCtx.close();
+    audioCtx=analyser=null;
+    document.getElementById('startBtn').textContent='🎤 Start';
+    document.getElementById('startBtn').classList.remove('stop');
+    document.getElementById('dot').classList.remove('on');
+    document.getElementById('statusTxt').textContent='Stopped';
+    document.getElementById('liveSol').textContent='—';
+    smFreq=0; currentNote=null; redrawGhost(null);
   } else {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-        video: false
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({
+        audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false
       });
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 2048;
-      micSrc = audioCtx.createMediaStreamSource(stream);
-      micSrc.connect(analyser);
-      running = true;
-      mbtn.textContent = '⏹ Stop';
-      mbtn.classList.add('on');
-      dot.classList.add('on');
-      stat.textContent = 'Listening — sing any note!';
+      audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      analyser=audioCtx.createAnalyser();
+      analyser.fftSize=2048;
+      audioCtx.createMediaStreamSource(stream).connect(analyser);
+      running=true;
+      document.getElementById('startBtn').textContent='⏹ Stop';
+      document.getElementById('startBtn').classList.add('stop');
+      document.getElementById('dot').classList.add('on');
+      document.getElementById('statusTxt').textContent='Listening — sing!';
       frame();
-    } catch(e) {
-      stat.textContent = 'Mic access denied — check browser permissions';
+    }catch(e){
+      document.getElementById('statusTxt').textContent='Mic access denied — check browser settings';
     }
   }
 }
+
+function clearNotes() {
+  committedNotes=[]; currentNote=null; smFreq=0;
+  prevGhostQtm=-1; prevGhostType='';
+  redrawCommitted(); redrawGhost(null);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+drawStaff();
+updateTargetUI();
+redrawCommitted();
 </script>
 </body>
 </html>
